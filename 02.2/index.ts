@@ -5,8 +5,6 @@ declare type Bag = {
   green: number;
 };
 
-const DICE_COLLECTION: Bag = { red: 12, green: 13, blue: 14 };
-
 export default async function run(input: string) {
   let sum = 0;
 
@@ -17,22 +15,16 @@ export default async function run(input: string) {
     let valid = true;
     line = line.split(":")[1];
 
+    const bag: Bag = { red: 0, blue: 0, green: 0 };
     for (const bagString of line.split(";")) {
-      const bag: Bag = { red: 0, green: 0, blue: 0 };
       for (const diceString of bagString.split(",").map((s) => s.trim())) {
         const [numString, color] = diceString.split(" ") as [string, Color];
         const num = Number.parseInt(numString);
         bag[color] = Math.max(bag[color], num);
       }
-
-      // check if bag is valid
-      if (Object.entries(bag).some(([color, amount]) => DICE_COLLECTION[color as Color] < amount)) {
-        valid = false;
-        break;
-      }
     }
 
-    if (valid) sum += id;
+    sum += Object.values(bag).reduce((pow, n) => pow * n, 1);
   }
 
   // return sum
