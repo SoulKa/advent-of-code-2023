@@ -7,5 +7,5 @@ export default async function run(input: string) {
       sum += num;
     }
   }
-  return sum.toString();
+  return sum;
 }
