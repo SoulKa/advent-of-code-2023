@@ -11,8 +11,6 @@ export default async function run(input: string) {
   for (let line of input.split("\n")) {
     const match = /^Game ([0-9]+):/.exec(line);
     if (match == null || match[1] == null) continue;
-    const id = Number.parseInt(match[1]);
-    let valid = true;
     line = line.split(":")[1];
 
     const bag: Bag = { red: 0, blue: 0, green: 0 };
