@@ -1,4 +1,4 @@
-import SparseMap from "./sparse-map";
+import { SparseMap } from "./ranges";
 declare type MapType =
   | "seed-to-soil"
   | "soil-to-fertilizer"
