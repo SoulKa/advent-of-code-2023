@@ -10,8 +10,7 @@ for (let day = 1; day <= now.getDate(); day++) {
   if (fs.existsSync(dir)) continue;
   console.log(`Setting up day ${dirname}...`);
   fs.mkdirSync(dir);
-  fs.mkdirSync(dir + ".2");
-  fs.writeFileSync(path.join(dir, "index.ts"), `export default async function run(input: string) {}\n`);
+  fs.writeFileSync(path.join(dir, "1.ts"), `export default async function run(input: string) {}\n`);
   fs.writeFileSync(path.join(dir, "input.txt"), "");
 }
 

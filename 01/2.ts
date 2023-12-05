@@ -1,5 +1,4 @@
 const DIGIT_NAMES = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
-const DIGITS = DIGIT_NAMES.map((_, i) => i.toString());
 
 export default async function run(input: string) {
   let sum = 0;
