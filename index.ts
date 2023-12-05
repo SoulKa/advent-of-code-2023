@@ -18,7 +18,9 @@ async function main() {
 
       // run each part
       for (let i = 1; i <= 2; i++) {
-        const runFunc = (await import(path.join(dirPath, i.toString() + ".ts"))).default as RunFunc;
+        const tsFilePath = path.join(dirPath, i.toString() + ".ts");
+        if (!fs.existsSync(tsFilePath)) continue;
+        const runFunc = (await import(tsFilePath)).default as RunFunc;
         const output = await runFunc(input); // run script
         console.log(` - Part ${i}: ${output}`);
       }
