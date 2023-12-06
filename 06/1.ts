@@ -18,7 +18,6 @@ export default async function run(input: string) {
     const record = distances[i];
     for (let tButton = 1; tButton < timeLimit; tButton++) {
       const distance = getDistanceForButtonPress(tButton, timeLimit);
-      console.log(distance, record);
       if (distance > record) winCounts[i]++;
     }
   }
