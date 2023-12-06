@@ -1,3 +1,5 @@
+// DISCLAIMER: I AM SORRY FOR THE BRUTE FORCE METHOD :D
+
 export default async function run(input: string) {
   const [timeString, distanceString] = input.split("\n");
   const timeLimit = Number.parseInt(timeString.split(":")[1].replace(/\s/g, ""));
