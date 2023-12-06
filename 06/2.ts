@@ -5,11 +5,11 @@ export default async function run(input: string) {
 
   // get the lower and upper threshold for pressing the button to win (intersection with record)
   const intersections = getCurveIntersections(record, timeLimit);
-  const [lowerLimit, upperLimit] = intersections.map((n) => Math.ceil(n)).sort();
+  const [lowerLimit, upperLimit] = intersections.map((n) => Math.ceil(n));
   return upperLimit - lowerLimit;
 }
 
 function getCurveIntersections(c: number, minusB: number) {
   const root = Math.sqrt(minusB * minusB - 4 * c);
-  return [(minusB + root) / 2, (minusB - root) / 2]; // use quadratic formula
+  return [(minusB - root) / 2, (minusB + root) / 2]; // use quadratic formula
 }

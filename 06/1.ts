@@ -12,18 +12,20 @@ export default async function run(input: string) {
     .map((s) => Number.parseInt(s));
 
   if (times.length !== distances.length) throw new RangeError(`Times and distances do not match!`);
-  const winCounts = new Array(times.length).fill(0);
+  const winCounts = new Array(times.length);
   for (let i = 0; i < times.length; i++) {
     const timeLimit = times[i];
     const record = distances[i];
-    for (let tButton = 1; tButton < timeLimit; tButton++) {
-      const distance = getDistanceForButtonPress(tButton, timeLimit);
-      if (distance > record) winCounts[i]++;
-    }
+
+    // get the lower and upper threshold for pressing the button to win (intersection with record)
+    const intersections = getCurveIntersections(record, timeLimit);
+    const [lowerLimit, upperLimit] = intersections.map((n) => Math.ceil(n));
+    winCounts[i] = upperLimit - lowerLimit;
   }
   return winCounts.reduce((prod, wins) => prod * wins, 1);
 }
 
-function getDistanceForButtonPress(holdTime: number, raceTime: number) {
-  return (raceTime - holdTime) * holdTime;
+function getCurveIntersections(c: number, minusB: number) {
+  const root = Math.sqrt(minusB * minusB - 4 * c);
+  return [(minusB - root) / 2, (minusB + root) / 2]; // use quadratic formula
 }
