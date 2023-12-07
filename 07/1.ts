@@ -5,7 +5,6 @@ declare type Card = "A" | "K" | "Q" | "J" | "T" | "9" | "8" | "7" | "6" | "5" | 
 declare type Range = Card[];
 declare type Cut = [range: Range, remainder: Card[]];
 
-//declare type Play = [primary: Range[], secondary: Range];
 declare type Play = {
   primary: Range[];
   secondary: Range;
@@ -45,13 +44,24 @@ export default async function run(input: string) {
     const [cardsString, bidString] = line.split(" ");
     const bid = Number.parseInt(bidString);
     const cards = cardsString.split("") as Card[];
-    const hand = new Hand(cards);
-    return Object.assign(getHighestPlay(hand), { bid });
+    const hand = new Hand(cards.slice());
+    return Object.assign(getHighestPlay(hand), { bid, cards });
   });
 
   // sort by highest kinds of plays (ascending)
-  plays.sort((a, b) => comparePlays(a.play, b.play));
-  console.log(inspect(plays.slice(plays.length - 100), true, null, true));
+  plays.sort((a, b) => {
+    // compare kind
+    if (a.kind !== b.kind) return a.kind - b.kind;
+    let comp: number;
+
+    // compare cards
+    for (let i = 0; i < a.cards.length; i++) {
+      comp = compareCards(b.cards[i], a.cards[i]);
+      if (comp !== 0) return comp;
+    }
+    return 0;
+  });
+  //console.log(inspect(plays, false, null, true));
   return plays.map(({ bid }, i) => bid * (i + 1)).reduce((sum, v) => sum + v, 0);
 }
 
@@ -117,31 +127,6 @@ function getPlay(hand: Hand, kind: Kind): Play | undefined {
  */
 function compareCards(a: Card, b: Card) {
   return CARD_TO_INDEX_MAP.get(a)! - CARD_TO_INDEX_MAP.get(b)!;
-}
-
-/**
- * Weakest plays will come first!
- */
-function comparePlays(a: Play, b: Play) {
-  // compare kind
-  if (a.kind !== b.kind) return a.kind - b.kind;
-  let comp: number;
-
-  // compare primary
-  comp = compareCards(b.primary[0][0], a.primary[0][0]);
-  if (comp !== 0) return comp;
-  if (b.primary.length === 2) {
-    comp = compareCards(b.primary[1][0], a.primary[1][0]);
-    if (comp !== 0) return comp;
-  }
-
-  // compare secondary
-  if (a.secondary.length !== b.secondary.length) throw new RangeError(`Secondary sizes do not match`);
-  for (let i = 0; i < a.secondary.length; i++) {
-    comp = compareCards(b.secondary[i], a.secondary[i]);
-    if (comp !== 0) return comp;
-  }
-  return 0;
 }
 
 function allCardsEqual(range: Range) {
