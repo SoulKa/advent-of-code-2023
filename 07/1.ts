@@ -1,5 +1,3 @@
-import { inspect } from "util";
-
 declare type Card = "A" | "K" | "Q" | "J" | "T" | "9" | "8" | "7" | "6" | "5" | "4" | "3" | "2";
 
 declare type Range = Card[];
@@ -61,7 +59,6 @@ export default async function run(input: string) {
     }
     return 0;
   });
-  //console.log(inspect(plays, false, null, true));
   return plays.map(({ bid }, i) => bid * (i + 1)).reduce((sum, v) => sum + v, 0);
 }
 

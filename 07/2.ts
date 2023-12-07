@@ -1,5 +1,3 @@
-import { inspect } from "util";
-
 declare type Card = "A" | "K" | "Q" | "J" | "T" | "9" | "8" | "7" | "6" | "5" | "4" | "3" | "2";
 
 declare type Range = Card[];
@@ -59,14 +57,11 @@ export default async function run(input: string) {
       const play = getHighestPlay(hand);
       gamesWithJoker.push({ bid, cards, play });
     }
-    //console.log(inspect(gamesWithJoker, false, null, true));
     games.push(gamesWithJoker.sort(compareGames)[gamesWithJoker.length - 1]);
   }
-  if (games.length !== 1e3) throw new RangeError(`Games should be 1K`);
 
   // sort by highest kinds of plays (ascending)
   games.sort(compareGames);
-  //console.log(inspect(games, false, null, true));
   return games.map(({ bid }, i) => bid * (i + 1)).reduce((sum, v) => sum + v, 0);
 }
 
