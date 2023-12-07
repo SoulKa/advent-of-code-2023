@@ -22,7 +22,7 @@ async function main() {
         if (!fs.existsSync(tsFilePath)) continue;
         const runFunc = (await import(tsFilePath)).default as RunFunc;
         const output = await runFunc(input); // run script
-        console.log(` - Part ${i}: ${output}`);
+        if (output != null) console.log(` - Part ${i}: ${output}`);
       }
     }
   }
