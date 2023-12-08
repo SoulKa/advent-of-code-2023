@@ -3,7 +3,6 @@ declare type NodeId = string;
 declare type Choice = [NodeId, NodeId];
 
 export default async function run(input: string) {
-  return 0;
   const { directions, nodes } = parseInput(input);
   return getSteps(nodes, directions, "AAA");
 }

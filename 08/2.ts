@@ -43,7 +43,8 @@ function parseNode(line: string) {
 }
 
 function lcm(...numbers: number[]) {
-  if (numbers.length < 2) throw new RangeError(`Cannot determine LCM from less than 2 numbers!`);
+  if (numbers.length === 0) return NaN;
+  if (numbers.length === 1) return numbers[0];
   if (numbers.length === 2) {
     const [a, b] = numbers.sort();
     return (b / gcd(a, b)) * a;
