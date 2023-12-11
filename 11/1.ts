@@ -85,16 +85,6 @@ class Map2D<T> {
     return true;
   }
 
-  cloneRow(y: number) {
-    this.nodes.splice(y, 0, this.nodes[y]);
-  }
-
-  cloneCol(x: number) {
-    for (let y = 0; y < this.height; y++) {
-      this.nodes[y].splice(x, 0, this.nodes[y][x]);
-    }
-  }
-
   isValid(x: number, y: number) {
     return x >= 0 && x < this.width && y >= 0 && y < this.height;
   }
