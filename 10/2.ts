@@ -21,12 +21,15 @@ class PipeMap {
     this.pipes = new Map2D(pipes);
     const root = this.findStart();
     if (root === undefined) throw new Error("Start not found!");
-    const loop = this.followPath(root);
+    const { pipe: rootSymbol, firstNeighbor } = this.resolveStartPipe(root);
+    this.pipes.set(root, rootSymbol);
+
+    const loop = this.followPath(root, firstNeighbor);
     if (loop === undefined) throw new Error("Loop not found!");
     this.loopMap = Map2D.withFill(this.pipes.width, this.pipes.height, "." as Pipe);
     for (const node of loop) this.loopMap.set(node, this.pipes.get(node)!);
 
-    // fill all dots between two lines
+    // fill all inside dots
     for (let y = 0; y < this.loopMap.height; y++) {
       let wallStart: undefined | Pipe;
       let inside = false;
@@ -74,36 +77,48 @@ class PipeMap {
     }
   }
 
-  private followPath(start: Node) {
-    const firstNeighbor = this.findNodeConnectedToMe(start);
-    if (firstNeighbor === undefined) throw new Error("No neighbor found from start!");
+  private resolveStartPipe(start: Node) {
+    const neighborsOfRoot = this.findNodesConnectedToMe(start);
+    if (neighborsOfRoot.length !== 2)
+      throw new Error(`Expected exactly two pipes connected to the start, but got ${neighborsOfRoot.length}`);
+    const [first, second] = neighborsOfRoot;
+    const firstDirection = getDirection(start, first);
+    const secondDirection = getDirection(start, second);
 
-    const path = [start];
-    let node = firstNeighbor;
-    const leftMost = {
-      direction: [0, 0] as Direction,
-      location: [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY] as Node,
-    };
-    while (!nodesEqual(node, start)) {
-      const prevNode = path[path.length - 1];
-      path.push(node);
-
-      // save highest node in path and its direction
-      if (node[0] <= leftMost.location[0]) {
-        leftMost.location = node;
-        leftMost.direction = getDirection(prevNode, node);
-      }
-
-      // next node
-      node = this.getNeightbors(node).filter((n) => !nodesEqual(n, prevNode))[0];
+    let pipe: Pipe;
+    if (nodesEqual(firstDirection, LEFT) && nodesEqual(secondDirection, UP)) {
+      pipe = "J";
+    } else if (nodesEqual(firstDirection, LEFT) && nodesEqual(secondDirection, RIGHT)) {
+      pipe = "-";
+    } else if (nodesEqual(firstDirection, LEFT) && nodesEqual(secondDirection, DOWN)) {
+      pipe = "7";
+    } else if (nodesEqual(firstDirection, UP) && nodesEqual(secondDirection, RIGHT)) {
+      pipe = "L";
+    } else if (nodesEqual(firstDirection, UP) && nodesEqual(secondDirection, DOWN)) {
+      pipe = "|";
+    } else if (nodesEqual(firstDirection, RIGHT) && nodesEqual(secondDirection, DOWN)) {
+      pipe = "F";
+    } else {
+      throw new Error("Could not resolve pipe value of S from neighbors: " + neighborsOfRoot);
     }
+    return {
+      pipe,
+      firstNeighbor: first,
+    };
+  }
 
-    // check if direction is clockwise (if loop is going down on the left side)
-    if (leftMost.direction[1] > 0) return path.reverse();
+  private followPath(start: Node, firstNeighbor: Node) {
+    const path = [start] as Node[];
+    let node = firstNeighbor;
+    while (!nodesEqual(node, start)) {
+      path.push(node);
+      node = this.getNeightbors(node).filter((n) => !nodesEqual(n, path[path.length - 2]))[0];
+    }
     return path;
   }
 
-  private findNodeConnectedToMe(me: Node) {
+  private findNodesConnectedToMe(me: Node) {
+    const neighbors = [] as Node[];
     const directionMapping = [
       [LEFT, ["-", "F", "L"]],
       [UP, ["|", "F", "7"]],
@@ -113,13 +128,13 @@ class PipeMap {
     for (const [direction, allowedPipes] of directionMapping) {
       const neighborNode = applyDirection(me, direction);
       const neighbor = this.pipes.get(neighborNode);
-      if (neighbor !== undefined && allowedPipes.includes(neighbor)) return neighborNode;
+      if (neighbor !== undefined && allowedPipes.includes(neighbor)) neighbors.push(neighborNode);
     }
+    return neighbors;
   }
 
   private getNeightbors(node: Node) {
     const neighbors = [] as Node[];
-
     switch (this.pipes.get(node)!) {
       case "-":
         return [applyDirection(node, LEFT), applyDirection(node, RIGHT)];
@@ -174,18 +189,6 @@ class Map2D<T> {
     return x >= 0 && x < this.width && y >= 0 && y < this.height;
   }
 
-  floodFill(start: Node, searchVal: T, newVal: T) {
-    const queue = [start];
-    while (queue.length !== 0) {
-      const node = queue.shift()!;
-      if (this.get(node) !== searchVal) continue;
-      this.set(node, newVal);
-      for (const neighborNode of this.getNeighbors(node)) {
-        queue.push(neighborNode);
-      }
-    }
-  }
-
   getNeighbors(node: Node) {
     return DIRECTIONS.map((d) => applyDirection(node, d));
   }
@@ -206,11 +209,6 @@ class Map2D<T> {
       }
     }
     return false;
-  }
-
-  isEdgeNode(node: Node) {
-    const [x, y] = node;
-    return x === 0 || x === this.width - 1 || y === 0 || y === this.height - 1;
   }
 
   print(spacing: number) {
