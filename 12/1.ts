@@ -25,13 +25,13 @@ function getArrangements(initialArrangement: Arrangement<Condition>, groups: num
   const arrangements = [] as Arrangement<KnownCondition>[];
   for (let i = 0; i < Math.pow(2, unknownIndices.length); i++) {
     const replacements = intToArrangement(i, unknownIndices.length);
-    const arrangement = initialArrangement.slice();
+    const arrangement = initialArrangement.slice() as Arrangement<KnownCondition>;
     for (let ui = 0; ui < unknownIndices.length; ui++) {
       arrangement[unknownIndices[ui]] = replacements[ui];
     }
-    arrangements.push(arrangement as Arrangement<KnownCondition>);
+    if (isValidArrangement(arrangement, groups)) arrangements.push(arrangement);
   }
-  return arrangements.filter((a) => isValidArrangement(a, groups));
+  return arrangements;
 }
 
 function intToArrangement(n: number, length: number) {

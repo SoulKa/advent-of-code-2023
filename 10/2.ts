@@ -1,13 +1,17 @@
+import Direction from "./direction";
+import Node from "./node";
+
 declare type RawPipeMap = Pipe[][];
-declare type Node = [number, number];
-declare type Direction = [-1 | 0 | 1, -1 | 0 | 1];
 declare type Pipe = "|" | "-" | "L" | "J" | "7" | "F" | "." | "S";
 
-const UP = [0, -1] as Direction;
-const DOWN = [0, 1] as Direction;
-const LEFT = [-1, 0] as Direction;
-const RIGHT = [1, 0] as Direction;
-const DIRECTIONS: Direction[] = [LEFT, RIGHT, UP, DOWN];
+const DIRECTIONS_TO_PIPE_MAPPING = [
+  [Direction.LEFT, Direction.UP, "J"],
+  [Direction.LEFT, Direction.RIGHT, "-"],
+  [Direction.LEFT, Direction.DOWN, "7"],
+  [Direction.UP, Direction.RIGHT, "L"],
+  [Direction.UP, Direction.DOWN, "|"],
+  [Direction.RIGHT, Direction.DOWN, "F"],
+] as [Direction, Direction, Pipe][];
 
 export default async function run(input: string) {
   return PipeMap.fromString(input).enclosedTileCount;
@@ -34,7 +38,7 @@ class PipeMap {
       let wallStart: undefined | Pipe;
       let inside = false;
       for (let x = 0; x < this.loopMap.width; x++) {
-        const node = [x, y] as Node;
+        const node = new Node([x, y]);
         const pipe = this.loopMap.get(node)!;
         switch (pipe) {
           case "L":
@@ -71,7 +75,7 @@ class PipeMap {
   private findStart() {
     for (let x = 0; x < this.pipes.width; x++) {
       for (let y = 0; y < this.pipes.height; y++) {
-        const node = [x, y] as Node;
+        const node = new Node([x, y]);
         if (this.pipes.get(node) === "S") return node;
       }
     }
@@ -82,25 +86,14 @@ class PipeMap {
     if (neighborsOfRoot.length !== 2)
       throw new Error(`Expected exactly two pipes connected to the start, but got ${neighborsOfRoot.length}`);
     const [first, second] = neighborsOfRoot;
-    const firstDirection = getDirection(start, first);
-    const secondDirection = getDirection(start, second);
+    const firstDirection = Direction.fromNodes(start, first);
+    const secondDirection = Direction.fromNodes(start, second);
 
-    let pipe: Pipe;
-    if (nodesEqual(firstDirection, LEFT) && nodesEqual(secondDirection, UP)) {
-      pipe = "J";
-    } else if (nodesEqual(firstDirection, LEFT) && nodesEqual(secondDirection, RIGHT)) {
-      pipe = "-";
-    } else if (nodesEqual(firstDirection, LEFT) && nodesEqual(secondDirection, DOWN)) {
-      pipe = "7";
-    } else if (nodesEqual(firstDirection, UP) && nodesEqual(secondDirection, RIGHT)) {
-      pipe = "L";
-    } else if (nodesEqual(firstDirection, UP) && nodesEqual(secondDirection, DOWN)) {
-      pipe = "|";
-    } else if (nodesEqual(firstDirection, RIGHT) && nodesEqual(secondDirection, DOWN)) {
-      pipe = "F";
-    } else {
-      throw new Error("Could not resolve pipe value of S from neighbors: " + neighborsOfRoot);
-    }
+    const pipe = DIRECTIONS_TO_PIPE_MAPPING.find(
+      ([a, b]) => firstDirection.equalTo(a) && secondDirection.equalTo(b)
+    )?.[2];
+    if (pipe === undefined) throw new Error("Could not resolve pipe value of S from neighbors: " + neighborsOfRoot);
+
     return {
       pipe,
       firstNeighbor: first,
@@ -120,10 +113,10 @@ class PipeMap {
   private findNodesConnectedToMe(me: Node) {
     const neighbors = [] as Node[];
     const directionMapping = [
-      [LEFT, ["-", "F", "L"]],
-      [UP, ["|", "F", "7"]],
-      [RIGHT, ["-", "7", "J"]],
-      [DOWN, ["|", "L", "J"]],
+      [Direction.LEFT, ["-", "F", "L"]],
+      [Direction.UP, ["|", "F", "7"]],
+      [Direction.RIGHT, ["-", "7", "J"]],
+      [Direction.DOWN, ["|", "L", "J"]],
     ] as [Direction, Pipe[]][];
     for (const [direction, allowedPipes] of directionMapping) {
       const neighborNode = applyDirection(me, direction);
@@ -137,17 +130,17 @@ class PipeMap {
     const neighbors = [] as Node[];
     switch (this.pipes.get(node)!) {
       case "-":
-        return [applyDirection(node, LEFT), applyDirection(node, RIGHT)];
+        return [applyDirection(node, Direction.LEFT), applyDirection(node, Direction.RIGHT)];
       case "7":
-        return [applyDirection(node, LEFT), applyDirection(node, DOWN)];
+        return [applyDirection(node, Direction.LEFT), applyDirection(node, Direction.DOWN)];
       case "F":
-        return [applyDirection(node, RIGHT), applyDirection(node, DOWN)];
+        return [applyDirection(node, Direction.RIGHT), applyDirection(node, Direction.DOWN)];
       case "J":
-        return [applyDirection(node, LEFT), applyDirection(node, UP)];
+        return [applyDirection(node, Direction.LEFT), applyDirection(node, Direction.UP)];
       case "L":
-        return [applyDirection(node, UP), applyDirection(node, RIGHT)];
+        return [applyDirection(node, Direction.UP), applyDirection(node, Direction.RIGHT)];
       case "|":
-        return [applyDirection(node, UP), applyDirection(node, DOWN)];
+        return [applyDirection(node, Direction.UP), applyDirection(node, Direction.DOWN)];
     }
     return neighbors;
   }
@@ -173,13 +166,13 @@ class Map2D<T> {
   }
 
   get(node: Node) {
-    const [x, y] = node;
+    const { x, y } = node;
     if (!this.isValid(x, y)) return;
     return this.nodes[y][x];
   }
 
   set(node: Node, value: T) {
-    const [x, y] = node;
+    const { x, y } = node;
     if (!this.isValid(x, y)) return false;
     this.nodes[y][x] = value;
     return true;
@@ -190,13 +183,13 @@ class Map2D<T> {
   }
 
   getNeighbors(node: Node) {
-    return DIRECTIONS.map((d) => applyDirection(node, d));
+    return Direction.DIRECTIONS.map((d) => applyDirection(node, d));
   }
 
   forEach(fn: (node: Node, value: T) => void) {
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
-        fn([x, y], this.nodes[y][x]);
+        fn(new Node([x, y]), this.nodes[y][x]);
       }
     }
   }
@@ -204,7 +197,7 @@ class Map2D<T> {
   some(fn: (node: Node, value: T) => boolean) {
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
-        const hit = fn([x, y], this.nodes[y][x]);
+        const hit = fn(new Node([x, y]), this.nodes[y][x]);
         if (hit) return true;
       }
     }
@@ -226,7 +219,7 @@ class Map2D<T> {
 
 function nodesEqual(a?: Node, b?: Node) {
   if (a === undefined || b === undefined) return false;
-  return a[0] === b[0] && a[1] === b[1];
+  return a.x === b.x && a.y === b.y;
 }
 
 function padSpaces(n: any, length: number) {
@@ -234,10 +227,6 @@ function padSpaces(n: any, length: number) {
   return " ".repeat(length - nStr.length) + nStr;
 }
 
-function getDirection(first: Node, second: Node) {
-  return [second[0] - first[0], second[1] - first[1]] as Direction;
-}
-
 function applyDirection(node: Node, direction: Direction) {
-  return [node[0] + direction[0], node[1] + direction[1]] as Node;
+  return new Node([node.x + direction.x, node.y + direction.y]);
 }
