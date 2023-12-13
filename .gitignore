@@ -134,4 +134,4 @@ output.txt
 
 .idea/
 session.txt
-input.txt
+*input.txt
