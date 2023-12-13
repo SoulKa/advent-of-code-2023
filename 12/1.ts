@@ -5,6 +5,7 @@ declare type Arrangement<C = Condition> = C[];
 
 export default async function run(input: string) {
   const possibilities = input
+    .trim()
     .split("\n")
     .map((line) => line.split(" "))
     .map(([conditionsString, groupsString]) =>

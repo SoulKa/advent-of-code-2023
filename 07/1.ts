@@ -38,7 +38,7 @@ const KIND_ORDER = [
 ];
 
 export default async function run(input: string) {
-  const plays = input.split("\n").map((line) => {
+  const plays = input.trim().split("\n").map((line) => {
     const [cardsString, bidString] = line.split(" ");
     const bid = Number.parseInt(bidString);
     const cards = cardsString.split("") as Card[];

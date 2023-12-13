@@ -1,7 +1,7 @@
 export default async function run(input: string) {
   let sum = 0;
 
-  for (const line of input.split("\n")) {
+  for (const line of input.trim().split("\n")) {
     const [winningString, numString] = line.split(":")[1].split("|");
     const winningSet = new Set(
       winningString

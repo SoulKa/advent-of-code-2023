@@ -1,5 +1,5 @@
 export default async function run(input: string) {
-  const lines = input.split("\n");
+  const lines = input.trim().split("\n");
   const cardCount = {} as { [cardId: number]: number };
   for (let i = 1; i <= lines.length; i++) cardCount[i] = 1;
 

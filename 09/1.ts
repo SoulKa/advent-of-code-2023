@@ -1,7 +1,10 @@
 declare type Sequence = number[];
 
 export default async function run(input: string) {
-  const sequences = input.split("\n").map((line) => line.split(" ").map((s) => Number.parseInt(s)));
+  const sequences = input
+    .trim()
+    .split("\n")
+    .map((line) => line.split(" ").map((s) => Number.parseInt(s)));
   return sequences
     .map((sequence) => {
       const history = History.fromSequence(sequence);

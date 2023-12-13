@@ -131,3 +131,7 @@ dist
 
 # output
 output.txt
+
+.idea/
+session.txt
+input.txt

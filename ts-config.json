@@ -3,10 +3,9 @@
   "ts-node": {
     "transpileOnly": false,
     "files": true,
-    "compilerOptions": {}
-  },
-  "compilerOptions": {
-    "target": "ES5",
-    "experimentalDecorators": true
+    "compilerOptions": {
+      "target": "ES6",
+      "experimentalDecorators": true
+    }
   }
 }

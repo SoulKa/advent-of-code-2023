@@ -10,6 +10,7 @@ declare type GetNumArrangements = (
 
 export default async function run(input: string) {
   const tasks = input
+    .trim()
     .split("\n")
     .map((line) => line.split(" "))
     .map(([conditionsString, groupsString]) => ({

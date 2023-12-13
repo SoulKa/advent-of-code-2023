@@ -48,7 +48,7 @@ const KIND_ORDER = [
 
 export default async function run(input: string) {
   const games = [] as Game[];
-  for (const line of input.split("\n")) {
+  for (const line of input.trim().split("\n")) {
     const [cardsString, bidString] = line.split(" ");
     const bid = Number.parseInt(bidString);
     const cards = cardsString.split("") as Card[];

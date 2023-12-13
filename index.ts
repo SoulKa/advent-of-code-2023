@@ -5,6 +5,8 @@ type RunFunc = (input: string) => Promise<string | number | undefined>;
 const dayArg = process.argv[2];
 
 async function main() {
+  console.log("Advent of Code 2023\n");
+
   // iterate over all riddles
   for (const dir of fs.readdirSync(__dirname, { withFileTypes: true })) {
     const { name } = dir;

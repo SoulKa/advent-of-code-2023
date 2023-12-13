@@ -4,7 +4,7 @@ declare type Choice = [NodeId, NodeId];
 declare type NodeMap = Map<NodeId, Choice>;
 
 export default async function run(input: string) {
-  const { directions, nodes } = parseInput(input);
+  const { directions, nodes } = parseInput(input.trim());
   const startingNodes = getStartingNodes(nodes);
   const steps = startingNodes.map((start) => getSteps(nodes, directions, start));
   return lcm(...steps);
