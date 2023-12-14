@@ -14,7 +14,14 @@ export default class Map2D<T> {
   }
 
   get cols() {
-    return rowsToCols(this.rows);
+    const cols = new Array(this.rows[0].length).fill([]) as T[][];
+    cols.forEach((_, x) => (cols[x] = new Array(this.rows.length)));
+    this.rows.forEach((row, y) => row.forEach((value, x) => (cols[x][y] = value)));
+    return cols;
+  }
+
+  get hash() {
+    return this.rows.map((row) => row.join("")).join("\n");
   }
 
   constructor(private nodes: T[][]) {}
@@ -67,26 +74,36 @@ export default class Map2D<T> {
   }
 
   print(spacing = 1) {
-    for (let y = this.height - 1; y >= 0; y--) {
-      for (let x = 0; x < this.width; x++) {
-        const value = this.nodes[y][x];
-        let valueStr = value + "";
-        if (typeof value === "number" && isNaN(value)) valueStr = ".";
-        process.stdout.write(padSpaces(valueStr, spacing));
-        if (x === this.width - 1) process.stdout.write(` ${y}\n`);
-      }
+    this.forEach(({ x, y }, value) => {
+      let valueStr = value + "";
+      process.stdout.write(padSpaces(valueStr, spacing));
+      if (x === this.width - 1) process.stdout.write(` ${y}\n`);
+    });
+  }
+
+  isEqualTo(other: Map2D<T>) {
+    if (this.width !== other.width || this.height !== other.height) return false;
+    return !this.some((node, value) => value !== other.get(node));
+  }
+
+  rotateLeft(times = 1) {
+    for (let i = 0; i < times; i++) {
+      this.nodes = this.cols.reverse();
     }
+  }
+
+  rotateRight(times = 1) {
+    for (let i = 0; i < times; i++) {
+      this.nodes = this.cols.map((col) => col.reverse());
+    }
+  }
+
+  clone() {
+    return new Map2D(this.nodes.map((row) => row.slice()));
   }
 }
 
 function padSpaces(n: any, length: number) {
   const nStr = n.toString();
   return " ".repeat(length - nStr.length) + nStr;
-}
-
-function rowsToCols<T>(rows: T[][]) {
-  const cols = new Array(rows[0].length).fill([]) as T[][];
-  cols.forEach((_, x) => (cols[x] = new Array(rows.length)));
-  rows.forEach((row, y) => row.forEach((value, x) => (cols[x][y] = value)));
-  return cols;
 }

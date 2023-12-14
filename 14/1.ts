@@ -10,7 +10,6 @@ export default async function run(input: string) {
   const map = new Map2D(lines.map((line) => line.split("") as Element[]));
 
   let weight = 0;
-  map.print();
 
   const { cols } = map;
   cols.forEach((col, x) => {
