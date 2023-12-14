@@ -14,7 +14,6 @@ for (let arg of process.argv.slice(2)) {
   }
 
   const [key, value] = arg.slice(2).split("=");
-  console.log(key, value);
   switch (key as OptionArg) {
     case "in":
       inputFileName = value || "test-input.txt";
